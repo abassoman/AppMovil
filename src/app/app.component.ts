@@ -1,4 +1,8 @@
 import { Component } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { MenuController } from '@ionic/angular';
+import { AuthService } from './services/auth.service';
+
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -6,13 +10,45 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   public appPages = [
-    { title: 'Inbox', url: '/folder/inbox', icon: 'mail' },
-    { title: 'Outbox', url: '/folder/outbox', icon: 'paper-plane' },
-    { title: 'Favorites', url: '/folder/favorites', icon: 'heart' },
-    { title: 'Archived', url: '/folder/archived', icon: 'archive' },
-    { title: 'Trash', url: '/folder/trash', icon: 'trash' },
-    { title: 'Spam', url: '/folder/spam', icon: 'warning' },
+    { title: 'Home', url: 'home-inicio', icon: 'home' },
+    { title: 'Agregar Auto', url: 'autos', icon: 'car' },
+    { title: 'Listar Autos', url: 'listar-autos', icon: 'list' },
+    { title: 'Pasajero', url: 'pasajeros', icon: 'accessibility' },
+    { title: 'Conductor', url: 'conductores', icon: 'man' },
+    { title: 'Listar Viajes', url: 'lista-viaje', icon: 'list' },
+    
   ];
-  public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-  constructor() {}
+  constructor(
+    private authService: AuthService, 
+    private router: Router, 
+    private menuController: MenuController  
+  ) {
+    this.initializeApp();
+  }
+  
+  checkMenuVisibility(url: string) {
+    // Oculta el menú en las rutas
+    if ( url === '/inicio' ||  url === '/registrar' ||url ==='/recupera-contra') {
+      this.menuController.enable(false);
+    } else {
+      this.menuController.enable(true);
+    }
+  }
+  
+  initializeApp() {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.checkMenuVisibility(event.url);
+      }
+    });
+  }
+  
+  logout() {
+    this.authService.logout().then(() => {
+      // Redirigir al usuario a la página de inicio de sesión o página principal
+      this.router.navigate(['/inicio']);
+    }).catch(error => {
+      console.error('Error al cerrar sesión:', error);
+    });
+  }
 }
